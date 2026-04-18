@@ -12,7 +12,11 @@ internal sealed record DotNetEfConfig(
     string? StartupProject,
     string? Context,
     string? Framework,
-    string? Configuration);
+    string? Configuration,
+    string? Runtime,
+    bool? Verbose,
+    bool? NoColor,
+    bool? PrefixOutput);
 
 internal static class DotNetEfConfigLoader
 {
@@ -75,6 +79,10 @@ internal static class DotNetEfConfigLoader
             string? context = null;
             string? framework = null;
             string? configuration = null;
+            string? runtime = null;
+            bool? verbose = null;
+            bool? noColor = null;
+            bool? prefixOutput = null;
 
             foreach (var property in document.RootElement.EnumerateObject())
             {
@@ -95,17 +103,24 @@ internal static class DotNetEfConfigLoader
                     case "configuration":
                         configuration = ValidateValue(fullPath, property);
                         break;
-                    case "connection":
-                    case "connectionString":
-                    case "provider":
                     case "runtime":
-                        throw new CommandException(Resources.DotNetEfConfigForbiddenProperty(fullPath, property.Name));
+                        runtime = ValidateValue(fullPath, property);
+                        break;
+                    case "verbose":
+                        verbose = ValidateBoolValue(fullPath, property);
+                        break;
+                    case "noColor":
+                        noColor = ValidateBoolValue(fullPath, property);
+                        break;
+                    case "prefixOutput":
+                        prefixOutput = ValidateBoolValue(fullPath, property);
+                        break;
                     default:
                         throw new CommandException(Resources.DotNetEfConfigUnknownProperty(fullPath, property.Name));
                 }
             }
 
-            return new DotNetEfConfig(fullPath, project, startupProject, context, framework, configuration);
+            return new DotNetEfConfig(fullPath, project, startupProject, context, framework, configuration, runtime, verbose, noColor, prefixOutput);
         }
     }
 
@@ -114,6 +129,13 @@ internal static class DotNetEfConfigLoader
             && !string.IsNullOrWhiteSpace(property.Value.GetString())
                 ? property.Value.GetString()!
                 : throw new CommandException(Resources.DotNetEfConfigInvalidValue(fullPath, property.Name));
+
+    private static bool ValidateBoolValue(string fullPath, JsonProperty property)
+        => property.Value.ValueKind == JsonValueKind.True || property.Value.ValueKind == JsonValueKind.False
+            ? property.Value.GetBoolean()
+            : throw new CommandException(Resources.DotNetEfConfigInvalidBoolValue(fullPath, property.Name));
+
+
 
     private static string ResolvePath(string configDirectory, string path)
         => Path.IsPathRooted(path)

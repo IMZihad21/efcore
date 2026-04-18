@@ -64,8 +64,18 @@ internal class RootCommand : CommandBase
         var startupProjectPath = _startupProject!.Value() ?? config?.StartupProject;
         var framework = _framework!.Value() ?? config?.Framework;
         var configuration = _configuration!.Value() ?? config?.Configuration;
+        var runtime = _runtime!.Value() ?? config?.Runtime;
         var context = ResolveContext(_args!, config?.Context);
         var remainingArguments = CreateRemainingArguments(_args!, context);
+
+        if (config?.Verbose == true && !ContainsOption(_args!, "-v", "--verbose"))
+            Reporter.IsVerbose = true;
+
+        if (config?.NoColor == true && !ContainsOption(_args!, "--no-color"))
+            Reporter.NoColor = true;
+
+        if (config?.PrefixOutput == true && !ContainsOption(_args!, "--prefix-output"))
+            Reporter.PrefixOutput = true;
 
         var (projectFile, startupProjectFile) = ResolveProjects(
             projectPath,
@@ -78,12 +88,12 @@ internal class RootCommand : CommandBase
             projectFile,
             framework,
             configuration,
-            _runtime!.Value());
+            runtime);
         var startupProject = Project.FromFile(
             startupProjectFile,
             framework,
             configuration,
-            _runtime!.Value());
+            runtime);
 
         if (!_noBuild!.HasValue())
         {

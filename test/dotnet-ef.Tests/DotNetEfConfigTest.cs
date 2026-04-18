@@ -24,7 +24,11 @@ public class DotNetEfConfigTest
               "startupProject": "src/App.Api",
               "context": "AppDbContext",
               "framework": "net9.0",
-              "configuration": "Debug"
+              "configuration": "Debug",
+              "runtime": "win-x64",
+              "verbose": true,
+              "noColor": true,
+              "prefixOutput": false
             }
             """);
 
@@ -37,6 +41,10 @@ public class DotNetEfConfigTest
         Assert.Equal("AppDbContext", config.Context);
         Assert.Equal("net9.0", config.Framework);
         Assert.Equal("Debug", config.Configuration);
+        Assert.Equal("win-x64", config.Runtime);
+        Assert.True(config.Verbose);
+        Assert.True(config.NoColor);
+        Assert.False(config.PrefixOutput);
     }
 
     [Fact]
@@ -123,11 +131,15 @@ public class DotNetEfConfigTest
     [InlineData("""{ "framework": "   " }""", "must be a non-empty JSON string")]
     [InlineData("""{ "extra": "value" }""", "Remove the unsupported 'extra' property")]
     [InlineData("""{ "extra": 1 }""", "Remove the unsupported 'extra' property")]
-    [InlineData("""{ "connection": "Data Source=test.db" }""", "The 'connection' property isn't supported")]
-    [InlineData("""{ "connection": 1 }""", "The 'connection' property isn't supported")]
-    [InlineData("""{ "connectionString": "Data Source=test.db" }""", "The 'connectionString' property isn't supported")]
-    [InlineData("""{ "provider": "SqlServer" }""", "The 'provider' property isn't supported")]
-    [InlineData("""{ "runtime": "win-x64" }""", "The 'runtime' property isn't supported")]
+    [InlineData("""{ "connection": "Data Source=test.db" }""", "Remove the unsupported")]
+    [InlineData("""{ "connection": 1 }""", "Remove the unsupported")]
+    [InlineData("""{ "connectionString": "Data Source=test.db" }""", "Remove the unsupported")]
+    [InlineData("""{ "provider": "SqlServer" }""", "Remove the unsupported")]
+    [InlineData("""{ "runtime": 1 }""", "must be a non-empty JSON string")]
+    [InlineData("""{ "runtime": "" }""", "must be a non-empty JSON string")]
+    [InlineData("""{ "verbose": "true" }""", "must be a boolean")]
+    [InlineData("""{ "noColor": "false" }""", "must be a boolean")]
+    [InlineData("""{ "prefixOutput": 1 }""", "must be a boolean")]
     public void Load_rejects_invalid_config(string contents, string messageFragment)
     {
         using var directory = new TestDirectory();

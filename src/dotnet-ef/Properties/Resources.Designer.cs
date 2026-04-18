@@ -170,14 +170,6 @@ namespace Microsoft.EntityFrameworkCore.Tools.Properties
             => GetString("DotnetEfFullName");
 
         /// <summary>
-        ///     Unable to read '{configFile}'. The '{propertyName}' property isn't supported in .config/dotnet-ef.json.
-        /// </summary>
-        public static string DotNetEfConfigForbiddenProperty(object? configFile, object? propertyName)
-            => string.Format(
-                GetString("DotNetEfConfigForbiddenProperty", nameof(configFile), nameof(propertyName)),
-                configFile, propertyName);
-
-        /// <summary>
         ///     Unable to read '{configFile}'. Fix the JSON and try again. {details}
         /// </summary>
         public static string DotNetEfConfigInvalidJson(object? configFile, object? details)
@@ -199,6 +191,14 @@ namespace Microsoft.EntityFrameworkCore.Tools.Properties
         public static string DotNetEfConfigInvalidValue(object? configFile, object? propertyName)
             => string.Format(
                 GetString("DotNetEfConfigInvalidValue", nameof(configFile), nameof(propertyName)),
+                configFile, propertyName);
+
+        /// <summary>
+        ///     Unable to read '{configFile}'. The '{propertyName}' property must be a boolean.
+        /// </summary>
+        public static string DotNetEfConfigInvalidBoolValue(object? configFile, object? propertyName)
+            => string.Format(
+                GetString("DotNetEfConfigInvalidBoolValue", nameof(configFile), nameof(propertyName)),
                 configFile, propertyName);
 
         /// <summary>
